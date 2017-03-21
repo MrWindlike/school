@@ -20,7 +20,6 @@
       </ul>
       <div  class="navigation">
         <ul>
-          <!-- <div class="line"></div> -->
             <li v-for="(item,index) in point" >
               <span class="whitepoint" :class="{'bluepoint':(index === active)}" @click = "jump(index)"></span>
               <!-- <div class="line"></div> -->
