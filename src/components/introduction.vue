@@ -146,8 +146,7 @@ export default {
           border-top: 1px white solid;
           border-bottom: 1px white solid;
           height: 260px;
-          width: 580px;
-          //transform: skewY(1deg);
+          width: 580px;          
         }
         .matter{
           margin: auto;
