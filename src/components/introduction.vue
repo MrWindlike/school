@@ -27,7 +27,7 @@
             </li>
         </ul>
       </div>
-      <div class="closeButton" @click="close($event)" @animationend="animationend"></div>
+      <div class="closeButton" @click="close($event)" @animationend="animationend()"></div>
     </div>
   </transition>
 </template>
