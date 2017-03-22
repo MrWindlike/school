@@ -79,6 +79,11 @@ export default {
 	  	
   },
   watch:{
+  		src:function(){
+  			var audio = document.getElementsByTagName('audio')[0];
+  			this.duration = audio.duration;
+  			this.progress.width = audio.currentTime/audio.duration*100+"%";
+  		},
 	  	nowindex:function(){
 	  		this.flag = false;
 	  		var listUl = document.getElementsByClassName('list')[0].getElementsByTagName('ul')[0];
@@ -222,7 +227,7 @@ export default {
   			document.onmousemove = null;
   			document.onmouseup = null;
   			
-  		}
+  		}.bind(this);
   	},
   	jump(e){
   		var wrapper = document.getElementsByClassName('wrapper')[0];
