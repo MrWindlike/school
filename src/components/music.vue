@@ -1,10 +1,9 @@
 <template>
 	<div class="bg" @resize="getHeight">
-		<div class="note"></div>
-		<audio :src="music[now].src" autoplay ></audio>
+		<!-- <audio :src="music[0].src" ></audio> -->
+		<div class="note" v-show="showNote" @transitionend="showNote=false"></div>
     	<div class="wrapper">
     		<div class="main">
-    			
     			<div class="list">
     				<ul>    			
     					<li v-for="(item,index) of music"  @click="change(index)" :class="{'active':(index === nowindex)}">
@@ -18,7 +17,7 @@
     						<div class="title">{{music[index].name}}</div><!-- 
     					 --><span class="icon-play3"
     					  :class="{'icon-pause2':now===index && status}"
-    					   @click="pause(index)"></span>
+    					   @click="pause(index, $event.target)"></span>
     						<div class="text">{{text(index)}}</div>
     						<div class="line"></div>    						
     					</li>    					
@@ -47,8 +46,8 @@
 </template>
 	
 <script>
+import bus from '../bus.js'
 export default {
-	props : ['music'],
   data () {
     return {
     	height:[],
@@ -59,23 +58,33 @@ export default {
     	progress:{
     		width:'0%'
     	},
-    	now:0,
-    	flag : true		//是否检测滚动条滑动
+    	now:-1,
+    	music : {},
+    	flag : true,		//是否检测滚动条滑动
+    	showNote : false
     };
   },
-  mounted(){
-  		var audio = document.getElementsByTagName('audio')[0];
-  		audio.addEventListener('loadeddata',function(){
-  			this.duration = audio.duration;  					
-  		}.bind(this));
-  		audio.addEventListener('timeupdate',function(){
-  			this.progress.width = audio.currentTime/audio.duration*100+"%";
-  		}.bind(this));
-  		audio.pause();
+  created : function(){
+  	var _this = this;
+    _this.$http({
+      url : './data.json', 
+      method : 'get'}).then(function(result) {
+        _this.music = result.body.music;
+      });
+  },
+  mounted : function(){
+
+  	var audio = document.getElementsByTagName('audio')[0];
+  	audio.addEventListener('loadeddata',function(){
+  		this.duration = audio.duration;  					
+  	}.bind(this));
+  	audio.addEventListener('timeupdate',function(){
+  		this.progress.width = audio.currentTime/audio.duration*100+"%";
+  	}.bind(this));
+  	this.status = audio.played.length;
   },
   updated(){
-	  	
-  		this.getHeight();
+  	this.getHeight();
 	  	
   },
   watch:{
@@ -86,19 +95,44 @@ export default {
 	  		{
 	  			listUl.scrollTop = this.listHeight[(this.nowindex-1)/3-1];
 	  		}
+	  	},
+	  	now : function(){
+	  		var _this = this;
+	  		bus.$emit('changeMusic', _this.now);
+	  		var audio = document.getElementsByTagName('audio')[0];
+	  		audio.addEventListener('loadeddata',function(){
+	  			this.duration = audio.duration;  					
+	  		}.bind(this));
+	  		audio.addEventListener('timeupdate',function(){
+	  			this.progress.width = audio.currentTime/audio.duration*100+"%";
+	  		}.bind(this));
 	  	}
   },
   methods:{
-  	creatNote : function(){
+  	creatNote : function(target){
+		this.showNote = true;
+		var playButtons = document.getElementsByClassName('icon-play3');
+		var startRect = target.getBoundingClientRect(),
+			endRect = playButtons[playButtons.length-1].getBoundingClientRect();
+		var el = this.$el.children[0];
+		var _this = this;
+		console.log(startRect.top);
+		el.style.top = startRect.top + 'px';
+		el.style.left = startRect.left + 'px';
+		setTimeout(function(){
+		  el.style.top = endRect.top + 'px';
+		  el.style.left = endRect.left + 8 + 'px';
+		  
+		},17);
 
   	},
   	text : function(index){
   		return this.music[index].text.replace(/\|/g, "\n\n");
   	},
   	getHeight : function(){
-  		var li = document.getElementsByClassName("detail")[0].getElementsByTagName('ul')[0].getElementsByTagName('li');
+  		var li = this.$el.getElementsByClassName("detail")[0].getElementsByTagName('ul')[0].getElementsByTagName('li');
 
-  		var listLi = document.getElementsByClassName('list')[0].getElementsByTagName('ul')[0].getElementsByTagName('li');
+  		var listLi = this.$el.getElementsByClassName('list')[0].getElementsByTagName('ul')[0].getElementsByTagName('li');
 
   		for( var i = 0 ; i < li.length ; i++ )
   		{
@@ -180,11 +214,11 @@ export default {
 			this.status = true;
 		}
   	},
-  	pause(index){
+  	pause(index, target){
   		var audio = document.getElementsByTagName('audio')[0];
   		if(index !== -1 && this.now !== index){
 			this.now = index;
-			audio.play();
+			this.creatNote(target);
   			this.play = true;
   			this.status = true;
 			return;
@@ -192,7 +226,11 @@ export default {
 
   		if(this.status == false)
   		{
+  			if(this.now = -1)
+  				this.now = 0;
 	  		audio.play();
+	  		if(target)
+		  		this.creatNote(target);
   			this.play = true;
   		}
   		else
@@ -222,7 +260,7 @@ export default {
   			document.onmousemove = null;
   			document.onmouseup = null;
   			
-  		}
+  		}.bind(this);
   	},
   	jump(e){
   		var wrapper = document.getElementsByClassName('wrapper')[0];
@@ -249,6 +287,15 @@ export default {
 		width: 100%;
 		height: 100%;
         overflow: hidden;
+
+        &>.note{
+        	position: absolute;
+			transition:left ease .5s , top ease-in-out .5s;
+        	&:before{
+        		content:"\e900";
+        		font-family: "icomoon";
+        	}
+        }
 		.wrapper{
 			position: relative;
 			width: 920px;
@@ -460,13 +507,13 @@ export default {
 			font-size: 45px !important;
 			width: 100% !important;
 			
-			.icon-play3:before {
-			  	margin-left:200px;
-			  	margin-right: 200px;
+			.icon-play3 {
+			  	margin-left:200px !important;
+			  	margin-right: 200px !important;
 			}
-			.icon-pause2:before {
-			 	margin-left:200px;
-			  	margin-right: 200px;
+			.icon-pause2 {
+			 	margin-left:200px !important;
+			  	margin-right: 200px !important;
 			}
 		}
 	}
