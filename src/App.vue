@@ -2,7 +2,7 @@
   <div id="app">
     <audio :src="msg.music[0].src" ></audio>
     <v-main></v-main>
-    <router-view :books="msg.books" :msg="msg.introduction"></router-view>
+    <router-view :books="msg.books" :msg="msg.introduction" :view="msg.view"></router-view>
   </div>
 </template>
 
@@ -35,6 +35,7 @@ export default {
         audio.setAttribute('src', "http://www.sfengyong.cn/" + _this.msg.music[index].name + ".m4a");
         _this.$el.insertBefore(audio, _this.$el.children[0]);
         audio.play();
+
       });
   }
 }

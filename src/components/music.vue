@@ -1,8 +1,10 @@
 <template>
+	<transition name="move">
 	<div class="bg" @resize="getHeight">
 		<!-- <audio :src="music[0].src" ></audio> -->
-		<div class="note" v-show="showNote" @transitionend="showNote=false"></div>
+		<div class="note" v-show="showNote" @transitionend="hideNote"></div>
     	<div class="wrapper">
+    		<router-link to="/" class="closeButton"></router-link>
     		<div class="main">
     			<div class="list">
     				<ul>    			
@@ -37,16 +39,17 @@
 	    			<span class="icon-backward2" @click="last"></span><!-- 
 	    			 --><span class="icon-play3" :class="{'icon-pause2':status}" @click="pause(-1)"></span><!-- 
 	    			 --><span class="icon-forward3" @click="next"></span>
-    			</div>    			
-    			
+    			</div>
     		</div>
     	</div>
     	<div class="background"></div>
     </div>
+    </transition>
 </template>
 	
 <script>
 import bus from '../bus.js'
+
 export default {
   data () {
     return {
@@ -109,6 +112,10 @@ export default {
 	  	}
   },
   methods:{
+  	hideNote : function(){
+  		this.showNote = false;
+
+  	},
   	creatNote : function(target){
 		this.showNote = true;
 		var playButtons = document.getElementsByClassName('icon-play3');
@@ -116,7 +123,6 @@ export default {
 			endRect = playButtons[playButtons.length-1].getBoundingClientRect();
 		var el = this.$el.children[0];
 		var _this = this;
-		console.log(startRect.top);
 		el.style.top = startRect.top + 'px';
 		el.style.left = startRect.left + 'px';
 		setTimeout(function(){
@@ -209,24 +215,27 @@ export default {
   		
   	},
   	next(){
-		if(this.now!=this.music.length){
+		if(this.now!=this.music.length-1){
 			this.now++;
 			this.status = true;
 		}
   	},
   	pause(index, target){
+  		
   		var audio = document.getElementsByTagName('audio')[0];
+  		
   		if(index !== -1 && this.now !== index){
 			this.now = index;
 			this.creatNote(target);
   			this.play = true;
   			this.status = true;
+
 			return;
   		}
 
   		if(this.status == false)
   		{
-  			if(this.now = -1)
+  			if(this.now === -1)
   				this.now = 0;
 	  		audio.play();
 	  		if(target)
@@ -276,6 +285,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+	.move-enter, .move-leave-active{
+		transform: translate(100%);
+	}
+
+	.closeButton{
+		position:absolute;
+		top:-28px;
+		right:0;
+		color: black;
+		text-decoration: none;
+
+		&:before{
+			content:"\e117";
+			font-family: icomoon;
+			font-size: 28px;
+		}
+	}
 	ul,li{
 		list-style: none;
 	}
@@ -287,7 +313,7 @@ export default {
 		width: 100%;
 		height: 100%;
         overflow: hidden;
-
+		transition: transform .3s ease;
         &>.note{
         	position: absolute;
 			transition:left ease .5s , top ease-in-out .5s;

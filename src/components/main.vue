@@ -367,13 +367,19 @@ a{
     width: 120px; height: 120px;
     padding:10px;
     overflow:hidden;
+
     &:hover .cover{
       background:rgba(0,0,0,.5);
+    }
+  
+    .text{
+      transform:translate(-50%, -50%) skew(180deg);
     }
 
     &:hover .text{
       opacity:1;
-      border:0;
+      transform:translate(-50%, -50%) skew(0deg);
+
     }
 
     & .icon{
