@@ -5,6 +5,7 @@
           <li 
           v-for="(item,index) in str"
           :style="{background: 'url(\'../resource/img/introduction/'+index+'.jpg\')  0 / cover'}">
+            <div class="icon-chevron-thin-up" @click="changePage(-1)" v-show="index!=0"></div>
             <transition name="moveToRight">
               <div class="matter" v-show="active === index">
                 <div class="blur" :style="{background: 'url(\'../resource/img/introduction/'+index+'.jpg\')  0 / cover fixed'}"></div>
@@ -16,10 +17,12 @@
                 <div class="hborder"></div>
               </div>
             </transition>
+            <div class="icon-chevron-thin-down" @click="changePage(1)" v-show="index!=str.length-1"></div>
           </li>
       </ul>
-      <div  class="navigation">
+      <div  class="navigation"> 
         <ul>
+          <!-- <div class="line"></div> -->
             <li v-for="(item,index) in point" >
               <span class="whitepoint" :class="{'bluepoint':(index === active)}" @click = "jump(index)"></span>
               <!-- <div class="line"></div> -->
@@ -45,10 +48,10 @@ export default {
     }
   },
   methods : {
-    changePage(){
-      
-      var delta = event.deltaY || -event.detail;
-      if(delta < 0)
+    changePage(direction){
+      if(direction!==1 && direction !==-1)
+        var delta = event.deltaY || -event.detail;
+      if(delta < 0 || direction < 0)
       {
         if(this.active !=0)
         {
@@ -57,9 +60,11 @@ export default {
           this.top.top = this.top.top+'%';
           this.active--;
         }
+
       }
       else
       {
+
         if(this.active!=this.number-1)
           {
             this.top.top =  parseInt(this.top.top);
@@ -100,6 +105,27 @@ export default {
     transform: translateX(-100px);
   }
 
+  @keyframes arrowUp{
+    0%{
+      opacity:0;
+        top: 4%;
+    }
+    100%{
+      opacity:1;
+        top: 0%;
+    }
+  }
+  @keyframes arrowDown{
+    0%{
+      opacity:0;
+        bottom: 4%;
+    }
+    100%{
+      opacity:1;
+        bottom: 0%;
+    }
+  }
+
   ul,li{
     list-style: none;
   }
@@ -121,13 +147,47 @@ export default {
       transition: top ease .5s;
       display: inline-block;
 
-      li{
-        
+      li{        
         position: relative;
         width: 100%;
         height: 20%;
         display: flex;
-
+        .icon-chevron-thin-up{
+          display: inline-block;
+          cursor:pointer;
+          position: absolute;
+          left: 50%;
+          transform: translate(-50%);
+          animation-name: arrowUp;
+          animation-duration: 1s;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;          
+        }
+        .icon-chevron-thin-up:before{
+          font-family: 'icomoon';
+          content: "\e903";
+          font-size: 40px;
+          color: black;
+          opacity: 0.6;
+        }
+        .icon-chevron-thin-down{
+          display: inline-block;  
+          cursor:pointer;    
+          position: absolute;
+          left: 50%;
+          transform: translate(-50%);
+          animation-name: arrowDown;
+          animation-duration: 1s;
+          animation-timing-function: linear; 
+          animation-iteration-count: infinite;
+        }
+        .icon-chevron-thin-down:before{
+           font-family: 'icomoon';
+           content: "\e907";
+           font-size: 40px;
+           color: black;
+           opacity: 0.6;
+        }
         .vborder{
           position: absolute;
           top:15px;
